@@ -1,4 +1,4 @@
-# SCAR: Benchmarking the Split Computing Adversaral Robustness
+# Benchmarking the Adversaral Robustness in Latent Representations
 
 ## Environment
 ```bash
