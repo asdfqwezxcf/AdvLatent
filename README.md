@@ -51,7 +51,7 @@ wget ${Imagenet_2012_url}
 
 To run experiments, you should first download our pretrained model from [Here](https://drive.google.com/file/d/1t_BJih8nyuRhxUkqHxrYwBYamM4HgphP/view?usp=drive_link) and make sure they are in the right directory.
 ```bash
-cd ~/SCAR-Benchmarking-the-Split-Computing-Adversarial-Robustness
+cd ~/AdvLatent
 wget ${resource.tar}
 tar -xvf resource.tar
 ```
