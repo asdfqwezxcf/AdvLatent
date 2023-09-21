@@ -2,8 +2,8 @@
 
 ## Environment
 ```bash
-conda env create -n scar --file requirements.yml
-conda activate scar
+conda env create -n AdvSC --file requirements.yml
+conda activate AdvSC
 ```
 
 ## Dataset
