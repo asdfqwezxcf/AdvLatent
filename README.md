@@ -9,7 +9,7 @@ conda activate AdvSC
 ## Dataset
 Experiments are based on ImageNet2012 dataset. To preproduce the results, you should download the [IMAGENET](https://image-net.org/download) first. And put it in the right directory.
 ```bash
-cd ~/SCAR-Benchmarking-the-Split-Computing-Adversarial-Robustness
+cd ~/AdvLatent
 mkdir dataset/imagenet
 cd dataset/imagenet
 wget ${Imagenet_2012_url}
