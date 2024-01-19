@@ -1,13 +1,15 @@
 # Benchmarking the Adversaral Robustness in Latent Representations
 
+The Official Implementation of "[Adversarial Machine Learning in Latent Representations of Neural Networks](https://arxiv.org/abs/2309.17401)"
+
 ## Environment
 ```bash
-conda env create -n AdvSC --file requirements.yml
-conda activate AdvSC
+conda env create -n AdvLatent --file requirements.yml
+conda activate AdvLatent
 ```
 
 ## Dataset
-Experiments are based on ImageNet2012 dataset. To preproduce the results, you should download the [IMAGENET](https://image-net.org/download) first. And put it in the right directory.
+Experiments are based on ImageNet2012 dataset. To reproduce the results, you should download the [IMAGENET](https://image-net.org/download) first. And put it in the right directory.
 ```bash
 cd ~/AdvLatent
 mkdir dataset/imagenet
@@ -33,23 +35,26 @@ wget ${Imagenet_2012_url}
 
 ## Model Pool
 ### 1. Attacks on different model architecture
-  - ResNet152-Vanilla, ResNet152-Bottleneck
-  - ResNet50-vanilla, ResNet50-Bottleneck
-  - VGG16-Vanilla, VGG16-Bottleneck
+  - ResNet152, ResNet152-fc
+  - ResNet50, ResNet50-fc
+  - VGG16, VGG16-fc
 ### 2. Attacks on different feature compression approach
-  - One-stage Training
+  - Dimension Compression
     - supervised compression (SC)
     - knowledge distillation (KD)
-  - Multi-stage Training
     - BottleFit (BF)
-    - Entropic Student (ES)
-  - Other Feature Compression
+  - Data Compression
     - Bit Quantization (QT)
     - JEPG-based Codec (JC)
+  - Dimension Compression + Data Compression
+    - Entropic Student (ES)
 ### 3. Attacks on different compression ratio
   - Resnet152 -org, -ch3, -ch12
-
-To run experiments, you should first download our pretrained model from [Here](https://drive.google.com/file/d/1t_BJih8nyuRhxUkqHxrYwBYamM4HgphP/view?usp=drive_link) and make sure they are in the right directory.
+### 4. Attacks on adversarial training
+  - FastAT: [Paper](https://arxiv.org/abs/2001.03994)
+  - DAT: [Paper](https://proceedings.mlr.press/v180/zhang22a/zhang22a.pdf)
+  
+To run experiments, you should first download our pretrained model from [Here](https://drive.google.com/file/d/11r8cslaRaBrZL2klQCmp4epRlloMnz-n/view?usp=sharing) and make sure they are in the right directory.
 ```bash
 cd ~/AdvLatent
 wget ${resource.tar}
@@ -85,3 +90,16 @@ optional arguments:
                      1000)
 
 ```
+
+## Citation
+```bash
+@misc{zhang2023adversarial,
+      title={Adversarial Machine Learning in Latent Representations of Neural Networks}, 
+      author={Milin Zhang and Mohammad Abdi and Francesco Restuccia},
+      year={2023},
+      eprint={2309.17401},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+

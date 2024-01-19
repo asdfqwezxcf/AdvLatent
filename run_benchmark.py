@@ -22,7 +22,7 @@ np.random.seed(42)
 def arguments_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-md', '--model', type=str, metavar='', default='resnet50',
-                        help = 'the model for experiments (vgg16, resnet50, resnet152, supervised, distill, bottlefit, vgg16_bottlefit, jpeg_feature, cr-bq, end-to-end, entropic-student)')
+                        help = 'the model for experiments (vgg16, resnet50, resnet50_2, resnet50_3, resnet152, supervised, distill, bottlefit, vgg16_bottlefit, jpeg_feature, cr-bq, end-to-end, entropic-student, dat)')
     parser.add_argument('-ch', '--channel', type=int, metavar='', default=3,
                         help = 'the channels of the head output which representing different compression ratio')
     parser.add_argument('-s', '--split', action='store_true',
@@ -37,7 +37,7 @@ def arguments_parser():
                         help='specify name of the log file')
     parser.add_argument('-d', '--device', type=int, metavar='', default=0,
                         help='specify the gpu device, -1 means cpu')
-    parser.add_argument('-b', '--batchsize', type=int, metavar='', default=64,
+    parser.add_argument('-b', '--batchsize', type=int, metavar='', default=128,
                         help='specify the batchsize')
     parser.add_argument('-ns', '--nsamples', type=int, metavar='', default=1000,
                         help='specify the number of samples in experiments.')
@@ -62,7 +62,7 @@ def setup_log(log):
 
 def benchmarking():
     args = arguments_parser()
-    assert args.model in ['vgg16','resnet50','resnet152', 'supervised', 'distill', 'bottlefit', 'vgg16_bottlefit', 'jpeg_feature', 'cr-bq', 'end-to-end', 'entropic-student', 'resnet-qt'], "the model is not defined"
+    assert args.model in ['vgg16', 'vgg16_5', 'vgg16_8', 'vgg16_11', 'vgg16_14', 'resnet50', 'resnet50_0','resnet50_1', 'resnet50_2', 'resnet50_3', 'resnet152', 'resnet152_0', 'resnet152_1', 'resnet152_2', 'resnet152_3','supervised', 'distill', 'bottlefit', 'vgg16_bottlefit', 'jpeg_feature', 'cr-bq', 'end-to-end', 'entropic-student', 'resnet-qt', 'dat', 'fastat'], "the model is not defined"
     assert args.attack in ['FGSM', 'BIM', 'MIM', 'PGD', 'PGD_2', 'Natk', 'NES', 'Evo', 'Sopt', 'HSJA', 'Satk','Tatk'], "the attack is not defined"
     explog = setup_log(args.logging)
     # load model
@@ -70,23 +70,30 @@ def benchmarking():
     clip_max = 1.
     headmodel = None
     ckpt = None
-    if args.model == 'vgg16':
+    if args.model in ['vgg16', 'vgg16_5', 'vgg16_8', 'vgg16_11', 'vgg16_14']:
         try:
             model = vgg16_bn(weights="IMAGENET1K_V1")
         except:
             model = vgg16_bn(pretrained=True) # backward compatible to older torch version
-    elif args.model == 'resnet152':
+    elif args.model in ['resnet152','resnet152_0','resnet152_1','resnet152_2','resnet152_3']:
         try:
             model = resnet152(weights="IMAGENET1K_V1")
         except:
             model = resnet152(pretrained=True)
-    elif args.model in ['resnet50', 'resnet-qt']:
+    elif args.model in ['resnet50', 'resnet50_0', 'resnet50_1', 'resnet50_2', 'resnet50_3', 'resnet-qt','fastat','dat']:
         try:
             model = resnet50(weights="IMAGENET1K_V1")
         except:
             model = resnet50(pretrained=True)
         if args.model == 'resnet-qt':
             model = quantize_resnet(model)
+        elif args.model == 'dat':
+            model.load_state_dict(torch.load('resource/dat/datpgd_imagenet_epoch30.checkpoint')['state_dict'])
+        elif args.model == 'fastat':
+            checkpoint = torch.load("resource/fat/imagenet_model_weights_4px.pth.tar")['state_dict']
+            sd = {k[len('module.'):]:v for k,v in checkpoint.items()}
+            model.load_state_dict(sd)
+
     elif args.model == 'vgg16_bottlefit':
         try:
             model = custom_vgg16(weights='VGG16_BN_Weights.IMAGENET1K_V1')
@@ -133,17 +140,43 @@ def benchmarking():
     if check_if_updatable(model):
         model.update()
 
-    tailmodel = AdvModel(model)
-
     # split model
     if args.split:
         clip_min = None # for latent representation, there is no explicit lower bound and upper bound
         clip_max = None
-        if args.model == 'vgg16':
-            headmodel = SplitVggHead(model)
-            tailmodel = SplitVggTail(model)
-        elif args.model in ['resnet50', 'resnet152', 'resnet-qt']:
+        if args.model in ['vgg16','vgg16_5', 'vgg16_8', 'vgg16_11','vgg16_14']:
+            if args.model == 'vgg16':
+                headmodel = SplitVggHead(model)
+                tailmodel = SplitVggTail(model)
+            elif args.model == 'vgg16_5':
+                headmodel = SplitVggHead(model,ratio=15)
+                tailmodel = SplitVggTail(model,ratio=15)
+            elif args.model == 'vgg16_8':
+                headmodel = SplitVggHead(model,ratio=25)
+                tailmodel = SplitVggTail(model,ratio=25)
+            elif args.model == 'vgg16_11':
+                headmodel = SplitVggHead(model,ratio=35)
+                tailmodel = SplitVggTail(model,ratio=35)
+            else:
+                headmodel = SplitVggHead(model,ratio=45)
+                tailmodel = SplitVggTail(model,ratio=45)
+        elif args.model in ['resnet50', 'resnet50_0','resnet50_1', 'resnet50_2', 'resnet50_3', 'resnet152', 'resnet152_0','resnet152_1','resnet152_2','resnet152_3','resnet-qt', 'fastat']:
             headmodel = SplitResNetHead(model)
+            tailmodel = SplitResNetTail(model)
+            if args.model in ['resnet50_1','resnet152_1']:
+                headmodel = SplitResNetHead(model,depth=1)
+                tailmodel = SplitResNetTail(model,depth=1)
+            elif args.model in ['resnet50_2','resnet152_2']:
+                headmodel = SplitResNetHead(model,depth=3)
+                tailmodel = SplitResNetTail(model,depth=3)
+            elif args.model in ['resnet50_3','resnet152_3']:
+                headmodel = SplitResNetHead(model,depth=4)
+                tailmodel = SplitResNetTail(model,depth=4)
+            elif args.model in ['resnet50_0','resnet152_0']:
+                headmodel = SplitResNetHead(model,depth=0)
+                tailmodel = SplitResNetTail(model,depth=0)
+        elif args.model == 'dat':
+            headmodel = SplitResNetHead(model,(0,0,0),(1,1,1))
             tailmodel = SplitResNetTail(model)
         elif args.model in ['vgg16_bottlefit', 'jpeg_feature', 'cr-bq', 'end-to-end', 'entropic-student']:
             head_layers = None
@@ -159,7 +192,12 @@ def benchmarking():
         else:
             headmodel = SplitHead(model)
             tailmodel = SplitTail(model)
-    
+    else:
+        if args.model == 'dat':
+            tailmodel = AdvModel(model,(0,0,0),(1,1,1))
+        else:
+            tailmodel = AdvModel(model)
+        
     # set up device
     device = "cuda:%d"%args.device if args.device>=0 else "cpu"
 
@@ -210,7 +248,13 @@ def benchmarking():
 		        transforms.ToTensor(),
                 ])),
         batch_size=batchsize, shuffle=True, num_workers=cpu_count())
-
+    if args.model == 'fastat':
+        test_loader = torch.utils.data.DataLoader(
+            datasets.ImageNet('dataset/imagenet', split='val', transform=transforms.Compose([
+                    transforms.RandomResizedCrop(288),
+                    transforms.ToTensor(),
+                    ])),
+            batch_size=batchsize, shuffle=True, num_workers=cpu_count())
     # start recording and run experiment
     explog.info("Experiments start! - Model: %s_%dch, Split: %s, Target: %d, Attack: %s, epsilon: %.3f"%(args.model,args.channel,args.split,args.target,args.attack,args.epsilon))
     
