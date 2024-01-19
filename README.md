@@ -1,7 +1,5 @@
 # Benchmarking the Adversaral Robustness in Latent Representations
 
-The Official Implementation of "[Adversarial Machine Learning in Latent Representations of Neural Networks](https://arxiv.org/abs/2309.17401)"
-
 ## Environment
 ```bash
 conda env create -n AdvLatent --file requirements.yml
@@ -88,18 +86,5 @@ optional arguments:
   -b , --batchsize   specify the batchsize (default: 256)
   -ns , --nsamples   specify the number of samples in experiments. (default:
                      1000)
-
-```
-
-## Citation
-```bash
-@misc{zhang2023adversarial,
-      title={Adversarial Machine Learning in Latent Representations of Neural Networks}, 
-      author={Milin Zhang and Mohammad Abdi and Francesco Restuccia},
-      year={2023},
-      eprint={2309.17401},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
 ```
 
