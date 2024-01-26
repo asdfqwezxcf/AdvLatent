@@ -52,7 +52,7 @@ wget ${Imagenet_2012_url}
   - FastAT: [Paper](https://arxiv.org/abs/2001.03994)
   - DAT: [Paper](https://proceedings.mlr.press/v180/zhang22a/zhang22a.pdf)
   
-To run experiments, you should first download our pretrained model from [Here](https://drive.google.com/file/d/11r8cslaRaBrZL2klQCmp4epRlloMnz-n/view?usp=sharing) and make sure they are in the right directory.
+To run experiments, you should first download pretrained models from [Here](https://drive.google.com/file/d/11r8cslaRaBrZL2klQCmp4epRlloMnz-n/view?usp=sharing) and make sure they are in the right directory.
 ```bash
 cd ~/AdvLatent
 wget ${resource.tar}
